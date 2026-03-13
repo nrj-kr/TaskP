@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f5f5;
+  --card: #ffffff;
+  --ink: #111;
+  --ink-soft: #666;
+  --ink-ghost: #aaa;
+  --border: #e0e0e0;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --danger: #dc2626;
+  --radius: 8px;
+}
+
+html, body {
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 1.5rem;
+}
+
+.sub a { color: var(--accent); text-decoration: none; }
+.sub a:hover { text-decoration: underline; }
+
+.banner {
+  display: none;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.banner.visible { display: block; }
+.banner.error { background: #fef2f2; border: 1px solid #fecaca; color: var(--danger); }
+.banner.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.google-btn:hover { background: #fafafa; border-color: #c8c8c8; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 1.25rem 0;
+  font-size: 12px;
+  color: var(--ink-ghost);
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.field { margin-bottom: 0.875rem; }
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+.input-wrap { position: relative; }
+
+.input-wrap input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+}
+
+.input-wrap input::placeholder { color: var(--ink-ghost); }
+
+.input-wrap input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.input-wrap input.has-icon { padding-right: 38px; }
+
+.eye-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-ghost);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.eye-btn:hover { color: var(--ink-soft); }
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.25rem 0 1.25rem;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-soft);
+  user-select: none;
+}
+
+.check-label input[type=checkbox] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.forgot { font-size: 13px; color: var(--accent); text-decoration: none; cursor: pointer; }
+.forgot:hover { text-decoration: underline; }
+
+.submit-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+
+.submit-btn:hover { background: var(--accent-hover); }
+.submit-btn:active { transform: scale(0.99); }
+.submit-btn.loading { opacity: 0.7; pointer-events: none; }
+.submit-btn.loading .btn-text { opacity: 0; }
+
+.spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+
+.submit-btn.loading .spinner { opacity: 1; }
+
+.spinner::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* OTP overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.overlay.visible { display: flex; }
+
+.otp-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 340px;
+  position: relative;
+  text-align: center;
+}
+
+.otp-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.otp-card p { font-size: 13px; color: var(--ink-soft); margin-bottom: 1.25rem; line-height: 1.5; }
+.otp-card p strong { color: var(--ink); font-weight: 500; }
+
+.otp-close {
+  position: absolute;
+  top: 12px; right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--ink-ghost);
+  line-height: 1;
+}
+
+.otp-close:hover { color: var(--ink); }
+
+.otp-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.otp-inputs input {
+  width: 44px;
+  height: 50px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+}
+
+.otp-inputs input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.otp-action-btn {
+  width: 100%;
+  padding: 9px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.15s;
+}
+
+.otp-action-btn:hover { background: var(--accent-hover); }
+
+.otp-footer { font-size: 13px; color: var(--ink-soft); }
+.otp-footer a { color: var(--accent); cursor: pointer; }
+.otp-footer a:hover { text-decoration: underline; }
+
+.field-inline {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+  margin-bottom: 0.75rem;
+  display: block;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+}
+
+.field-inline:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+.pw-hint { font-size: 12px; min-height: 16px; margin: -4px 0 8px; text-align: left; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>Sign in</h2>
+  <p class="sub">No account? <a href="MainRegister.html">Create one</a></p>
+
+  <div class="banner" id="banner"><span id="bannerText"></span></div>
+
+  <button class="google-btn" onclick="handleGoogleSignIn()">
+    <svg width="18" height="18" viewBox="0 0 18 18">
+      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/>
+      <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+    </svg>
+    Continue with Google
+  </button>
+
+  <div class="divider">or</div>
+
+  <form id="signInForm" onsubmit="handleEmailSignIn(event)" novalidate>
+    <div class="field">
+      <label for="email">Email</label>
+      <div class="input-wrap">
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <input type="password" id="password" placeholder="Your password" autocomplete="current-password" class="has-icon" required>
+        <button type="button" class="eye-btn" id="togglePw" aria-label="Show password">
+          <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="check-label">
+        <input type="checkbox" id="remember"> Remember me
+      </label>
+      <a class="forgot" onclick="openOtp()">Forgot password?</a>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">
+      <span class="btn-text">Sign in</span>
+      <div class="spinner"></div>
+    </button>
+  </form>
+</div>
+
+<!-- Forgot password overlay -->
+<div class="overlay" id="otpOverlay" onclick="overlayClick(event)">
+  <div class="otp-card">
+    <button class="otp-close" onclick="closeOtp()">&#215;</button>
+
+    <div id="step1">
+      <h3>Reset password</h3>
+      <p>Enter your email and we'll send a one-time code.</p>
+      <input type="email" class="field-inline" id="otpEmail" placeholder="your@email.com">
+      <button class="otp-action-btn" onclick="sendOtp()">Send code</button>
+      <div class="otp-footer"><a onclick="closeOtp()">Cancel</a></div>
+    </div>
+
+    <div id="step2" style="display:none">
+      <h3>Enter the code</h3>
+      <p>Sent to <strong id="otpEmailDisplay"></strong></p>
+      <div class="otp-inputs">
+        <input type="tel" maxlength="1" id="d0" oninput="otpNext(0)" onkeydown="otpBack(event,0)">
+        <input type="tel" maxlength="1" id="d1" oninput="otpNext(1)" onkeydown="otpBack(event,1)">
+        <input type="tel" maxlength="1" id="d2" oninput="otpNext(2)" onkeydown="otpBack(event,2)">
+        <input type="tel" maxlength="1" id="d3" oninput="otpNext(3)" onkeydown="otpBack(event,3)">
+        <input type="tel" maxlength="1" id="d4" oninput="otpNext(4)" onkeydown="otpBack(event,4)">
+        <input type="tel" maxlength="1" id="d5" oninput="otpNext(5)" onkeydown="otpBack(event,5)">
+      </div>
+      <button class="otp-action-btn" onclick="verifyOtp()">Verify</button>
+      <div class="otp-footer">Didn't get it? <a onclick="resendOtp()">Resend</a></div>
+    </div>
+
+    <div id="step3" style="display:none">
+      <h3>New password</h3>
+      <p>Set your new password below.</p>
+      <input type="password" class="field-inline" id="newPw1" placeholder="New password" oninput="checkPwMatch()">
+      <input type="password" class="field-inline" id="newPw2" placeholder="Confirm password" oninput="checkPwMatch()">
+      <div class="pw-hint" id="pwHint"></div>
+      <button class="otp-action-btn" onclick="resetPassword()">Update password</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ── Config — replace with your values ──
+  const SUPABASE_URL = 'https://your-project.supabase.co'
+  const SUPABASE_ANON_KEY = 'your-anon-key'
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  // Password toggle
+  let pwVisible = false
+  document.getElementById('togglePw').addEventListener('click', () => {
+    pwVisible = !pwVisible
+    document.getElementById('password').type = pwVisible ? 'text' : 'password'
+    document.getElementById('eyeIcon').innerHTML = pwVisible
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+  })
+
+  // Email sign in
+  async function handleEmailSignIn(e) {
+    e.preventDefault()
+    const email = document.getElementById('email').value.trim()
+    const password = document.getElementById('password').value
+    if (!email || !password) return showBanner('Please enter your email and password.', 'error')
+    const btn = document.getElementById('submitBtn')
+    btn.classList.add('loading')
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    btn.classList.remove('loading')
+    if (error) return showBanner(error.message || 'Invalid email or password.', 'error')
+    window.location.href = '/dashboard'
+  }
+
+  // Google sign in
+  async function handleGoogleSignIn() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/dashboard' }
+    })
+    if (error) showBanner(error.message, 'error')
+  }
+
+  // Banner helper
+  function showBanner(msg, type) {
+    const el = document.getElementById('banner')
+    document.getElementById('bannerText').textContent = msg
+    el.className = 'banner visible ' + type
+  }
+
+  // OTP overlay
+  function openOtp() { document.getElementById('otpOverlay').classList.add('visible'); showStep(1) }
+  function closeOtp() { document.getElementById('otpOverlay').classList.remove('visible') }
+  function overlayClick(e) { if (e.target === document.getElementById('otpOverlay')) closeOtp() }
+  function showStep(n) { [1,2,3].forEach(i => document.getElementById('step'+i).style.display = i===n?'block':'none') }
+
+  async function sendOtp() {
+    const email = document.getElementById('otpEmail').value.trim()
+    if (!email) return alert('Please enter your email.')
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
+    if (error) return alert(error.message)
+    document.getElementById('otpEmailDisplay').textContent = email
+    showStep(2)
+    setTimeout(() => document.getElementById('d0').focus(), 80)
+  }
+
+  function otpNext(i) { if (document.getElementById('d'+i).value && i<5) document.getElementById('d'+(i+1)).focus() }
+  function otpBack(e,i) { if (e.key==='Backspace' && !document.getElementById('d'+i).value && i>0) document.getElementById('d'+(i-1)).focus() }
+
+  async function verifyOtp() {
+    const token = [0,1,2,3,4,5].map(i=>document.getElementById('d'+i).value).join('')
+    const email = document.getElementById('otpEmailDisplay').textContent
+    if (token.length<6) return alert('Enter the full 6-digit code.')
+    const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
+    if (error) return alert(error.message || 'Invalid code.')
+    showStep(3)
+    setTimeout(() => document.getElementById('newPw1').focus(), 80)
+  }
+
+  async function resendOtp() {
+    const email = document.getElementById('otpEmailDisplay').textContent
+    await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } })
+    alert('A new code has been sent.')
+  }
+
+  function checkPwMatch() {
+    const p1 = document.getElementById('newPw1').value
+    const p2 = document.getElementById('newPw2').value
+    const hint = document.getElementById('pwHint')
+    if (!p2) { hint.textContent=''; return }
+    hint.textContent = p1===p2 ? '' : 'Passwords do not match.'
+    hint.style.color = p1===p2 ? '#166534' : '#dc2626'
+  }
+
+  async function resetPassword() {
+    const p1 = document.getElementById('newPw1').value
+    const p2 = document.getElementById('newPw2').value
+    if (p1.length<8) return alert('Password must be at least 8 characters.')
+    if (p1!==p2) return alert('Passwords do not match.')
+    const { error } = await supabase.auth.updateUser({ password: p1 })
+    if (error) return alert(error.message)
+    closeOtp()
+    showBanner('Password updated. Please sign in again.', 'success')
+  }
+
+  // Redirect if already logged in
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (session && event==='SIGNED_IN') window.location.href = '/dashboard'
+  })
+</script>
+</body>
+</html>
